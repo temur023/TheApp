@@ -10,3 +10,4 @@ D:\MyProjects\loginForm\Clean.Domain\obj\Debug\net9.0\Clean.Domain.dll
 D:\MyProjects\loginForm\Clean.Domain\obj\Debug\net9.0\refint\Clean.Domain.dll
 D:\MyProjects\loginForm\Clean.Domain\obj\Debug\net9.0\Clean.Domain.pdb
 D:\MyProjects\loginForm\Clean.Domain\obj\Debug\net9.0\ref\Clean.Domain.dll
+D:\MyProjects\loginForm\Clean.Domain\obj\Debug\net9.0\Clean.Domain.sourcelink.json

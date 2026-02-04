@@ -17,13 +17,12 @@ public class UserRepository(DataContext context):IUserRepository
             query = query.Where(u => u.FullName.Contains(filter.Name));
         if (filter.Status.HasValue)
             query = query.Where(u => u.Status == filter.Status);
-        if (filter.DateOfRegistrationFrom.HasValue)
-            query = query.Where(u => u.DateOfRegistration >= filter.DateOfRegistrationFrom.Value.ToUniversalTime());
-        if (filter.DateOfRegistrationTo.HasValue)
-            query = query.Where(u => u.DateOfRegistration < filter.DateOfRegistrationTo.Value.AddDays(1).ToUniversalTime());
         var total = await query.CountAsync();
-        var users = await query.Skip((filter.PageNumber - 1) * filter.PageSize)
-            .Take(filter.PageSize).OrderBy(x=>x.LastSeen).ToListAsync();
+        var users = await query
+            .OrderByDescending(x => x.LastSeen) 
+            .Skip((filter.PageNumber - 1) * filter.PageSize) 
+            .Take(filter.PageSize)
+            .ToListAsync();
         return (users, total);
     }
 

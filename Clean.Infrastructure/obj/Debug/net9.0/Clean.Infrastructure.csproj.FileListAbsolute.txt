@@ -17,3 +17,4 @@ D:\MyProjects\loginForm\Clean.Infrastructure\obj\Debug\net9.0\refint\Clean.Infra
 D:\MyProjects\loginForm\Clean.Infrastructure\obj\Debug\net9.0\Clean.Infrastructure.pdb
 D:\MyProjects\loginForm\Clean.Infrastructure\obj\Debug\net9.0\Clean.Infrastructure.genruntimeconfig.cache
 D:\MyProjects\loginForm\Clean.Infrastructure\obj\Debug\net9.0\ref\Clean.Infrastructure.dll
+D:\MyProjects\loginForm\Clean.Infrastructure\obj\Debug\net9.0\Clean.Infrastructure.sourcelink.json

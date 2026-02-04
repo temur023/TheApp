@@ -149,3 +149,4 @@ D:\MyProjects\loginForm\Clean.Web\bin\Debug\net9.0\FluentEmail.Core.dll
 D:\MyProjects\loginForm\Clean.Web\bin\Debug\net9.0\FluentEmail.Smtp.dll
 D:\MyProjects\loginForm\Clean.Web\bin\Debug\net9.0\MailKit.dll
 D:\MyProjects\loginForm\Clean.Web\bin\Debug\net9.0\MimeKit.dll
+D:\MyProjects\loginForm\Clean.Web\obj\Debug\net9.0\Clean.Web.sourcelink.json

@@ -10,4 +10,5 @@ public interface IAuthenticationRepository
     
     Task<int> Register(User user, EmailVerificationToken verificationToken);
     Task<User?> Login(string email);
+    Task Update();
 }

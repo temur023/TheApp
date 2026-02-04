@@ -25,4 +25,8 @@ public class AuthenticationRepository(DataContext context):IAuthenticationReposi
         var find = await context.Users.FirstOrDefaultAsync(u => u.Email == email);
         return find;
     }
+    public async Task Update()
+    {
+        await context.SaveChangesAsync();
+    }
 }

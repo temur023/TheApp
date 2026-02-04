@@ -54,7 +54,8 @@ public class AuthenticationService(IAuthenticationRepository repository,IConfigu
         if (usr.Status == Status.Blocked)
             return new Response<string>(400, "You cannot login because you are blocked!");
         var token = CreateToken(usr);
-        
+        usr.LastSeen = DateTimeOffset.UtcNow;
+        await repository.Update();
         return new Response<string>(200, token);
     }
     

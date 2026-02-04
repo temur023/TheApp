@@ -32,7 +32,7 @@ public class UserService(IUserRepository repository,IHttpContextAccessor httpCon
             FullName = u.FullName,
             Email = u.Email,
             DateOfRegistration = u.DateOfRegistration,
-            LastSeen = DateTimeOffset.UtcNow-u.LastSeen,
+            LastSeen = getLastSeen(u.LastSeen.ToUniversalTime()),
             Status = u.Status
         }).ToList();
         return new PagedResponse<UserGetDto>(dto, filter.PageNumber, filter.PageSize, users.Total, "200");
@@ -47,7 +47,7 @@ public class UserService(IUserRepository repository,IHttpContextAccessor httpCon
             Id = find.Id,
             FullName = find.FullName,
             Email = find.Email,
-            LastSeen = DateTimeOffset.UtcNow-find.LastSeen,
+            LastSeen = getLastSeen(find.LastSeen.ToUniversalTime()),
             DateOfRegistration = find.DateOfRegistration,
             Status = find.Status
         };
@@ -119,5 +119,21 @@ public class UserService(IUserRepository repository,IHttpContextAccessor httpCon
         var users = await repository.DeleteUnverified();
         if (!users.Any()) return new Response<string>(404, "No unverified users found!");
         return new Response<string>(200, $"{users.Count} Unverified users have been deleted");
+    }
+
+    private string getLastSeen(DateTimeOffset seen)
+    {
+        long a = (int)((DateTimeOffset.UtcNow - seen).TotalSeconds);
+        if (a < 60)
+            return $"last seen {a} seconds ago";
+        if (a < 3600)
+            return $"last seen {a/60} minutes ago";
+        if (a < 86400)
+            return $"last seen {a/3600} hours ago";
+        if (a < 2592000)
+            return $"last seen {a / 86400} days ago";
+        if (a < 31104000)
+            return $"last seen {a / 2592000} months ago";
+        return $"last seen {a / 31104000} years ago";
     }
 }

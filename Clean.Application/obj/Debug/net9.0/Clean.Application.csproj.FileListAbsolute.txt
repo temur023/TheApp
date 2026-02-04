@@ -49,3 +49,4 @@ D:\MyProjects\loginForm\Clean.Application\bin\Debug\net9.0\Microsoft.AspNetCore.
 D:\MyProjects\loginForm\Clean.Application\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.Abstractions.dll
 D:\MyProjects\loginForm\Clean.Application\bin\Debug\net9.0\Microsoft.AspNetCore.Http.Results.xml
 D:\MyProjects\loginForm\Clean.Application\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.Abstractions.xml
+D:\MyProjects\loginForm\Clean.Application\obj\Debug\net9.0\Clean.Application.sourcelink.json

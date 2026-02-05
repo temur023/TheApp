@@ -15,7 +15,7 @@ builder.Services.RegisterInfrastructureServices(builder.Configuration);
 
 builder.Services
     .AddFluentEmail(builder.Configuration["EmailUserName"])
-    .AddSmtpSender(new System.Net.Mail.SmtpClient("smtp.gmail.com")
+    .AddSmtpSender(() => new System.Net.Mail.SmtpClient("smtp.gmail.com")
     {
         Port = 587,
         Credentials = new System.Net.NetworkCredential(

@@ -17,15 +17,13 @@ builder.Services.RegisterInfrastructureServices(builder.Configuration);
 
 builder.Services
     .AddFluentEmail("1rgashevjon@gmail.com")
-    .AddSmtpSender(new SmtpClient(builder.Configuration["EmailHost"])
+    .AddSmtpSender(new SmtpClient(builder.Configuration["EmailHost"], 587)
     {
-        Port = int.Parse(builder.Configuration["EmailPort"]!),
-        Credentials = new NetworkCredential(
-            builder.Configuration["EmailUserName"],
-            builder.Configuration["EmailPassword"]
-        ),
+        Credentials = new NetworkCredential(builder.Configuration["EmailUserName"],
+            builder.Configuration["EmailPassword"]),
         EnableSsl = true
     });
+
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

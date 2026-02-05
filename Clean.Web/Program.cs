@@ -23,7 +23,8 @@ builder.Services
             builder.Configuration["EmailPassword"]),
         EnableSsl = true,
         DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.Network,
-        UseDefaultCredentials = false
+        UseDefaultCredentials = false,
+        Timeout = 10000
     });
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

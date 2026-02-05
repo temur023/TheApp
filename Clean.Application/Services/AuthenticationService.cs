@@ -11,12 +11,10 @@ using FluentEmail.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
-using Resend;
 
 namespace Clean.Application.Services;
 
-public class AuthenticationService(IAuthenticationRepository repository,IConfiguration configuration,
-    IFluentEmail fluentEmail, EmailVerificationLinkFactory linkFactory):IAuthenticationService
+public class AuthenticationService(IAuthenticationRepository repository,IConfiguration configuration):IAuthenticationService
 {
 
 public async Task<Response<string>> Register(UserCreateDto user)
@@ -63,7 +61,7 @@ public async Task<Response<string>> Register(UserCreateDto user)
         client.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("Bearer", apiKey);
 
-        var verificationLink = $"believable-wisdom-production.up.railway.app/api/VerifyEmail?token={token.Id}";
+        var verificationLink = $"https://believable-wisdom-production.up.railway.app/api/VerifyEmail?token={token.Id}";
 
         var payload = new
         {
@@ -77,10 +75,12 @@ public async Task<Response<string>> Register(UserCreateDto user)
 
         var response = await client.PostAsync("https://api.mailersend.com/v1/email", content);
 
+        var responseText = await response.Content.ReadAsStringAsync();
+
         if (response.IsSuccessStatusCode)
             Console.WriteLine("Email sent successfully via MailerSend!");
         else
-            Console.WriteLine($"Failed to send email: {response.StatusCode}");
+            Console.WriteLine($"Failed to send email: {response.StatusCode} - {responseText}");
     }
     catch (Exception ex)
     {

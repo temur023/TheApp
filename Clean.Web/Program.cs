@@ -16,14 +16,6 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.RegisterInfrastructureServices(builder.Configuration);
 
-builder.Services
-    .AddFluentEmail("temurmalikirgashev@gmail.com") 
-    .AddSmtpSender(new SmtpClient(builder.Configuration["EmailHost"], builder.Configuration.GetValue<int>("EmailPort"))
-    {
-        Credentials = new NetworkCredential(builder.Configuration["EmailUserName"],
-            builder.Configuration["EmailPassword"]),
-        EnableSsl = true
-    });
 
 
 builder.Services.AddControllers()

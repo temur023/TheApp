@@ -1,5 +1,7 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Mail;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -55,33 +57,34 @@ public async Task<Response<string>> Register(UserCreateDto user)
     
     try
     {
-        var apiKey = Environment.GetEnvironmentVariable("MAILSEND_API_KEY")!;
-        var client = new HttpClient();
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+        var smtpHost = Environment.GetEnvironmentVariable("MAILTRAP_HOST") ?? "sandbox.smtp.mailtrap.io";
+        var smtpPort = int.Parse(Environment.GetEnvironmentVariable("MAILTRAP_PORT") ?? "587");
+        var smtpUser = Environment.GetEnvironmentVariable("MAILTRAP_USER") ?? "7cca393f713483";
+        var smtpPass = Environment.GetEnvironmentVariable("MAILTRAP_PASS") ?? "3354d871180949";
 
         var verificationLink = $"https://believable-wisdom-production.up.railway.app/api/VerifyEmail?token={token.Id}";
-        
-        var payload = new
+
+        using var client = new SmtpClient(smtpHost, smtpPort)
         {
-            from = "onboarding@resend.dev",
-            to = new[] { model.Email },     
-            subject = "Confirm your email",
-            html = $"<p>Hello {model.FullName},</p><p>Click the link below to verify:</p><a href='{verificationLink}'>Verify Email</a>"
+            Credentials = new NetworkCredential(smtpUser, smtpPass),
+            EnableSsl = true
         };
 
-        var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-        
-        var response = await client.PostAsync("https://api.resend.com/emails", content);
-        var responseText = await response.Content.ReadAsStringAsync();
+        var mailMessage = new MailMessage
+        {
+            From = new MailAddress("no-reply@yourapp.com", "TheApp"),
+            Subject = "Confirm your email",
+            Body = $"<p>Hello {model.FullName},</p><p>Click the link below to verify your email:</p><a href='{verificationLink}'>Verify Email</a>",
+            IsBodyHtml = true
+        };
+        mailMessage.To.Add(model.Email);
 
-        if (response.IsSuccessStatusCode)
-            Console.WriteLine("Email sent successfully via Resend Sandbox!");
-        else
-            Console.WriteLine($"Failed: {response.StatusCode} - {responseText}");
+        await client.SendMailAsync(mailMessage);
+        Console.WriteLine("Email sent successfully via Mailtrap!");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Critical Error: {ex.Message}");
+        Console.WriteLine($"Failed to send email: {ex.Message}");
     }
 
 

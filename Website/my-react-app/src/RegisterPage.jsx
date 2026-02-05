@@ -35,8 +35,12 @@ function RegisterPage() {
             setError(response.data.message || response.data.Message);
         }
     } catch (error) {
-        setError(error.response?.data?.Message || "Registration failed.");
-    }
+    const msg = error.response?.data?.message || 
+                error.response?.data?.Message || 
+                error.message || 
+                "Connection Error";
+    setError(msg);
+}
 }
     return(
     <>

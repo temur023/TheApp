@@ -51,13 +51,20 @@ public class AuthenticationService(IAuthenticationRepository repository,IConfigu
             return new Response<string>(400, "User with this email already exists.");
         }
         
-        _ = fluentEmail
+        var result = await fluentEmail
             .To(user.Email)
             .Subject("Confirmation for login!")
             .Body("Click the link to confirm", true)
             .SendAsync();
+        
+        if (!result.Successful)
+        {
+            var errors = string.Join(", ", result.ErrorMessages);
+            return new Response<string>(500, $"Failed to send email: {errors}");
+        }
 
-        return new Response<string>(200, "User registered successfully.");
+        return new Response<string>(200, "Email sent!");
+
     }
 
     public async Task<Response<string>> Login(UserLoginDto user)

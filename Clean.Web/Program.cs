@@ -16,8 +16,8 @@ builder.Services.AddControllers();
 builder.Services.RegisterInfrastructureServices(builder.Configuration);
 
 builder.Services
-    .AddFluentEmail("1rgashevjon@gmail.com")
-    .AddSmtpSender(new SmtpClient(builder.Configuration["EmailHost"], 587)
+    .AddFluentEmail(builder.Configuration["EmailUserName"]) 
+    .AddSmtpSender(new SmtpClient(builder.Configuration["EmailHost"], builder.Configuration.GetValue<int>("EmailPort"))
     {
         Credentials = new NetworkCredential(builder.Configuration["EmailUserName"],
             builder.Configuration["EmailPassword"]),

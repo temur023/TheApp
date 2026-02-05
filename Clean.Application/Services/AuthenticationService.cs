@@ -62,34 +62,35 @@ public async Task<Response<string>> Register(UserCreateDto user)
         var smtpUser = Environment.GetEnvironmentVariable("MAILTRAP_USER") ?? "7cca393f713483";
         var smtpPass = Environment.GetEnvironmentVariable("MAILTRAP_PASS") ?? "3354d871180949";
 
-        var verificationLink = $"https://believable-wisdom-production.up.railway.app/api/VerifyEmail?token={token.Id}";
-
         using var client = new SmtpClient(smtpHost, smtpPort)
         {
             Credentials = new NetworkCredential(smtpUser, smtpPass),
             EnableSsl = true
         };
 
+        var verificationLink = $"https://believable-wisdom-production.up.railway.app/api/VerifyEmail?token={token.Id}";
+
         var mailMessage = new MailMessage
         {
-            From = new MailAddress("no-reply@yourapp.com", "TheApp"),
+            From = new MailAddress("no-reply@yourapp.com", "TheApp"), 
             Subject = "Confirm your email",
             Body = $"<p>Hello {model.FullName},</p><p>Click the link below to verify your email:</p><a href='{verificationLink}'>Verify Email</a>",
             IsBodyHtml = true
         };
+        
         mailMessage.To.Add(model.Email);
 
         await client.SendMailAsync(mailMessage);
-        Console.WriteLine("Email sent successfully via Mailtrap!");
+        Console.WriteLine("✅ Test email sent successfully to Mailtrap!");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Failed to send email: {ex.Message}");
+        Console.WriteLine($"❌ Failed to send email: {ex.Message}");
     }
-
 
     return new Response<string>(200, "Registration complete. Verification email sent!");
 }
+
 
     public async Task<Response<string>> Login(UserLoginDto user)
     {

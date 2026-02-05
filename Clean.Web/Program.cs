@@ -23,7 +23,7 @@ builder.Services.AddCors(options =>
         policy.WithOrigins("https://theapp-production-3330.up.railway.app")
             .AllowAnyHeader()
             .AllowAnyMethod();
-    }); 
+    });
 });
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

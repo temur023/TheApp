@@ -1,7 +1,9 @@
 using System.Text;
 using Clean.Application.Services;
 using Clean.Infrastructure;
+using Clean.Infrastructure.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
@@ -68,7 +70,7 @@ builder.Services.AddSwaggerGen(opt =>
 });
 
 var app = builder.Build();
-
+app.UseHttpsRedirection();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -85,6 +87,11 @@ app.UseAuthorization();
 UserEndpoints.Map(app);
 
 app.MapControllers();
-app.UseHttpsRedirection();
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<DataContext>(); 
+    context.Database.Migrate();
+}
 
 app.Run();

@@ -14,5 +14,7 @@ public class User
     public string Password { get; set; } = "";
     public DateTimeOffset LastSeen { get; set; }
     public DateTimeOffset DateOfRegistration { get; set; }
+    public Status prevStatus { get; set; }
+    
     public Status Status { get; set; }
 }

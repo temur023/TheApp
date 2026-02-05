@@ -11,7 +11,7 @@ function App() {
             <Route path="/login" element={<LoginPage />}></Route>
             <Route path="/register" element={<RegisterPage />}></Route>
             <Route path="/getall" element={<GetAll />}></Route> 
-            <Route path="/" element={<Navigate to={"/getall"} />}></Route>
+            <Route path="/" element={<Navigate to={"/login"} />}></Route>
         </Routes>
         
     </BrowserRouter>

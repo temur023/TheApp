@@ -31,22 +31,7 @@ public class UserRepository(DataContext context):IUserRepository
         var find = await context.Users.FirstOrDefaultAsync(u => u.Id == id);
         return find;
     }
-
-    public async Task<User?> Delete(int id)
-    {
-        var find = await context.Users.FirstOrDefaultAsync(u => u.Id == id);
-        if (find == null) return null;
-        context.Users.Remove(find);
-        await context.SaveChangesAsync();
-        return find;
-    }
-
-    public async Task<User?> Block(int id)
-    {
-        var find = await context.Users.FirstOrDefaultAsync(u => u.Id == id);
-        return find;
-    }
-
+    
     public async Task Update()
     {
         await context.SaveChangesAsync();

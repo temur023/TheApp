@@ -17,31 +17,42 @@ public class AuthenticationService(IAuthenticationRepository repository,IConfigu
 
     public async Task<Response<string>> Register(UserCreateDto user)
     {
-        var model = new User
+        try
         {
-            FullName = user.FullName,
-            Email = user.Email,
-            Password = user.Password,
-            DateOfRegistration = DateTimeOffset.UtcNow,
-            LastSeen = DateTimeOffset.UtcNow,
-            Status = Status.Unverified
-        };
-        DateTimeOffset utcNow = DateTimeOffset.UtcNow;
-        var verificationToken = new EmailVerificationToken()
-        {
-            Id = Guid.NewGuid(),
-            UserId = model.Id,
-            Created = utcNow,
-            Expires = utcNow.AddDays(1)
-        };
-        await repository.Register(model,verificationToken);
-        string verificationLink = linkFactory.Create(verificationToken);
+            var model = new User
+            {
+                FullName = user.FullName,
+                Email = user.Email,
+                Password = user.Password,
+                DateOfRegistration = DateTimeOffset.UtcNow,
+                LastSeen = DateTimeOffset.UtcNow,
+                Status = Status.Unverified
+            };
+            if (model.Password.Length < 1)
+                return new Response<string>(400, "Password should contain al least a charecter");
+            if (model.Password != user.CheckPassword)
+                return new Response<string>(400, "Passwords do not match!");
+            DateTimeOffset utcNow = DateTimeOffset.UtcNow;
+            var verificationToken = new EmailVerificationToken()
+            {
+                Id = Guid.NewGuid(),
+                UserId = model.Id,
+                Created = utcNow,
+                Expires = utcNow.AddDays(1)
+            };
+            await repository.Register(model,verificationToken);
+            string verificationLink = linkFactory.Create(verificationToken);
         
-        await fluentEmail
-            .To(user.Email)
-            .Subject("Confirmation for login!")
-            .Body($"<a href='{verificationLink}'>Click here</a> to confirm!", true).SendAsync();
-        return new Response<string>(200, "The user has been registered! ");
+            await fluentEmail
+                .To(user.Email)
+                .Subject("Confirmation for login!")
+                .Body($"<a href='{verificationLink}'>Click here</a> to confirm!", true).SendAsync();
+            return new Response<string>(200, "The user has been registered! ");
+        }catch(Microsoft.EntityFrameworkCore.DbUpdateException)
+        {
+            return new Response<string>(400, "User with this email already exists!");
+        }
+       
     }
 
     public async Task<Response<string>> Login(UserLoginDto user)

@@ -12,12 +12,22 @@ public class AuthController(IAuthenticationService service):ControllerBase
     [HttpPost("create")]
     public async Task<IActionResult> Register(UserCreateDto user)
     {
-        return Ok(await service.Register(user));
+        var response = await service.Register(user);
+        if (response.StatusCode != 200)
+        {
+            return StatusCode(response.StatusCode, response);
+        }
+        return Ok(response);
     }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login(UserLoginDto user)
     {
-        return Ok(await service.Login(user));
+        var response = await service.Login(user);
+        if (response.StatusCode != 200)
+        {
+            return StatusCode(response.StatusCode, response);
+        }
+        return Ok(response);
     }
 }

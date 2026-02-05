@@ -14,38 +14,52 @@ public class UserController(IUserService service):ControllerBase
     [HttpGet("get-all")]
     public async Task<IActionResult> GetAll([FromQuery] UserFilter filter)
     {
-        return Ok(await service.GetAll(filter));
+        var response = await service.GetAll(filter);
+        if (response.StatusCode != 200)
+        {
+            return StatusCode(response.StatusCode, response);
+        }
+        return Ok(response);
     }
     [HttpDelete("delete-selected")]
     public async Task<IActionResult> DeleteSelected(List<int> ids)
     {
-        return Ok(await service.DeleteSelected(ids));
+        var response = await service.DeleteSelected(ids);
+        if (response.StatusCode != 200)
+        {
+            return StatusCode(response.StatusCode, response);
+        }
+        return Ok(response);
     }
     [HttpPut("block-selected")]
     public async Task<IActionResult> BlockSelected(List<int> ids)
     {
-        return Ok(await service.BlockSelected(ids));
+        var response = await service.BlockSelected(ids);
+        if (response.StatusCode != 200)
+        {
+            return StatusCode(response.StatusCode, response);
+        }
+        return Ok(response);
     }
     [HttpPut("unblock-selected")]
     public async Task<IActionResult> UnblockSelected(List<int> ids)
     {
-        return Ok(await service.UnblockSelected(ids));
-    }
-
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        return Ok(await service.Delete(id));
+        var response = await service.UnblockSelected(ids);
+        if (response.StatusCode != 200)
+        {
+            return StatusCode(response.StatusCode, response);
+        }
+        return Ok(response);
     }
 
     [HttpDelete("delete-unverified")]
     public async Task<IActionResult> DeleteUnverified()
     {
-        return Ok(await service.DeleteUnverified());
-    }
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Block(int id)
-    {
-        return Ok(await service.Block(id));
+        var response = await service.DeleteUnverified();
+        if (response.StatusCode != 200)
+        {
+            return StatusCode(response.StatusCode, response);
+        }
+        return Ok(response);
     }
 }

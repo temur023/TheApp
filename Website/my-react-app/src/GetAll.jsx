@@ -2,12 +2,15 @@ import axios from "axios";
 import React, {useEffect, useState, useCallback} from "react";
 import { useNavigate } from "react-router";
 import { Link } from "react-router";
+import { jwtDecode } from "jwt-decode";
 function GetAll(){
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [total, setTotal] = useState(0);
     const [checkedUsers, setCheckedUsers] = useState([]);
+    const [message, setMessage] = useState({ text: "", type: "" });
     const navigate = useNavigate();
+    
     const [filter, setFilter] = useState({
         name: "",
         status: "",
@@ -19,79 +22,102 @@ function GetAll(){
         localStorage.removeItem("userToken");
         navigate("/login")
     }
+
     const unblockSelected = async ()=>{
         try{
-         if (!window.confirm("Are you sure you want to unblock all selected users?")) return;
-            setLoading(true)
             const token = localStorage.getItem("userToken")
-            if(checkedUsers.length>0){
+           
                 const response = await axios.put("http://localhost:5017/api/User/unblock-selected",checkedUsers,{
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 })
-                window.alert("Selected users have been unblocked!");
+                setMessage({text: response.data.message, type: "success"})
                 setCheckedUsers([]);
                 fetchUsers();
                 setLoading(false)
-            }
-            else{
-                window.alert("No users selected")
-            }
         }
         catch(error){
-            console.error("Error: ", error.response?.data || error.message)
+            const message = error.response?.data?.message || "Action failed"
+            setMessage({text: message, type:"danger"})
         }
     }
-    const blockSelected = async ()=>{
-        try{
-         if (!window.confirm("Are you sure you want to block all selected users?")) return;
-            setLoading(true)
-            const token = localStorage.getItem("userToken")
-            if(checkedUsers.length>0){
-                const response = await axios.put("http://localhost:5017/api/User/block-selected",checkedUsers,{
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                })
-                window.alert("Selected users have been blocked!");
-                setCheckedUsers([]);
-                fetchUsers();
-                setLoading(false)
-            }
-            else{
-                window.alert("No users selected")
-            }
+    const blockSelected = async () => {
+    const token = localStorage.getItem("userToken");
+    if (!token) return navigate("/login");
+
+    const decoded = jwtDecode(token);
+    const currentUserId = String(
+        decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || decoded.nameid
+    );
+
+    try {
+        setLoading(true);
+        const response = await axios.put("http://localhost:5017/api/User/block-selected", checkedUsers, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const isSelfBlocked = checkedUsers.map(String).includes(currentUserId);
+
+        if (isSelfBlocked) {
+            localStorage.removeItem("userToken");
+            navigate("/login");
+            return; 
         }
-        catch(error){
-            console.error("Error: ", error.response?.data || error.message)
+
+        setMessage({ text: response.data.message, type: "success" });
+        setCheckedUsers([]);
+        fetchUsers();
+    } catch (error) {
+        if (error.response?.status === 401 || error.response?.status === 400) {
+            localStorage.removeItem("userToken");
+            navigate("/login");
         }
+    } finally {
+        setLoading(false);
     }
-    const deleteSelected = async ()=>{
-        try{
-            if (!window.confirm("Are you sure you want to delete all selected users?")) return;
-            setLoading(true)
-            const token = localStorage.getItem("userToken")
-            if(checkedUsers.length>0){
-                const response = await axios.delete("http://localhost:5017/api/User/delete-selected",{
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                    ,data: checkedUsers
-                })
-                window.alert("Selected users have been deleted!");
-                setCheckedUsers([]);
-                fetchUsers();
-                setLoading(false)
-            }
-            else{
-                window.alert("No users selected")
-            }
+};
+    const deleteSelected = async () => {
+    const token = localStorage.getItem("userToken");
+    if (!token) return navigate("/login");
+
+    try {
+        setLoading(true);
+        
+        const decoded = jwtDecode(token);
+        const currentUserId = String(
+            decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || decoded.nameid
+        );
+
+        const response = await axios.delete("http://localhost:5017/api/User/delete-selected", {
+            headers: { Authorization: `Bearer ${token}` },
+            data: checkedUsers 
+        });
+
+        const isSelfDeleted = checkedUsers.map(String).includes(currentUserId);
+
+        if (isSelfDeleted) {
+            localStorage.removeItem("userToken");
+            navigate("/login");
+            return;
         }
-        catch(error){
-            console.error("Error: ", error.response?.data || error.message)
+
+        setMessage({ text: response.data.message || "Users deleted", type: "success" });
+        setCheckedUsers([]);
+        await fetchUsers(); 
+        
+    } catch (error) {
+        console.error("Delete failed:", error); 
+        if (error.response?.status === 401 || error.response?.status === 403) {
+            localStorage.removeItem("userToken");
+            navigate("/login");
+        } else {
+            setMessage({ text: "Failed to delete users", type: "error" });
         }
+    } finally {
+        setLoading(false);
     }
+};
     function handleCheckingUsers(id){
         setCheckedUsers(c=>c.includes(id)?c.filter((userId)=>userId!==id):[...c, id]);
     }
@@ -131,9 +157,14 @@ const fetchUsers = useCallback(async () => {
         setTotal(response.data.totalRecords || 0);
 
     } catch (error) {
-        console.error("Fetching users failed!", error);
-        setUsers([]);
+    const message = error.response?.data?.message || "Action failed"
+    setMessage({text: message, type:"danger"})
+    if (error.response?.status === 401) {
+        localStorage.removeItem("userToken");
+        navigate("/login");
     }
+    setUsers([]);
+}
 }, [filter]); 
 useEffect(() => {
         const delayDebounceFn = setTimeout(() => {
@@ -144,29 +175,38 @@ useEffect(() => {
 useEffect(() => {
     setCheckedUsers([]);
 }, [users]);
-
+const totalPages = Math.ceil(total/filter.pageSize)
     const deleteUnverifiedUsers = async () =>{
         try{
-            if (!window.confirm("Are you sure you want to delete all unverified users?")) return;
             setLoading(true)
-            const token = localStorage.Item("userToken")
+            const token = localStorage.getItem("userToken")
             const response = await axios.delete("http://localhost:5017/api/User/delete-unverified",{
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
             });
-            alert(response.data.message || "Unverified users deleted successfully!");
+            setMessage({text: response.data.message, type: "success"})
             setLoading(false)
+            fetchUsers();
         }
         catch(error){
-            console.error("Error: ", error .response?.data || error.message)
+            const message = error.response?.data?.message || "Action failed"
+            setMessage({text: message, type:"danger"})
         }
     }
 return (
-        <div className="container-fluid mt-5">
+        <div className="container-fluid mt-2 mt-md-5 d-flex flex-column justify-content-start">
+            
             <div className="row justify-content-center">
-                <div className="col-12 w-75">
+                <div className="col-12 col-md-9">
+                    {message.text && (
+                            <div className={`alert alert-${message.type} alert-dismissible fade show w-25`} role="alert">
+                                {message.text}
+                                <button type="button" className="btn-close" onClick={() => setMessage({text:"", type:""})}></button>
+                            </div>
+                        )}
                     <div className="d-flex justify-content-end mb-2">
+                        
                     <button 
                         onClick={logout} 
                         className="btn btn-outline-dark btn-sm fw-bold px-4"
@@ -178,9 +218,9 @@ return (
                         Logout
                     </button>
                 </div>
-                    <div className="row mb-3 bg-light p-3 rounded border mx-0">
+<div className="row mb-3 bg-light p-3 rounded border mx-0">
         
-        <div className="col-md-6 d-flex gap-2">
+        <div className="col-md-6 d-flex gap-2 justify-content-center justify-content-md-start">
             
             <button 
                 className="btn btn-danger"
@@ -226,9 +266,9 @@ return (
             </button>
         </div>
 
-        <div className="col-md-6">
+        <div className="col-md-6 mt-3 mt-md-0">
             <div className="row g-2 justify-content-end">
-                <div className="col-auto">
+                <div className="col-6 col-md-auto">
                     <input 
                         type="text" 
                         className="form-control" 
@@ -237,7 +277,7 @@ return (
                         onChange={(e) => setFilter({...filter, name: e.target.value, pageNumber: 1})} 
                     />
                 </div>
-                <div className="col-auto">
+                <div className="col-6 col-md-auto">
                     <select 
                         className="form-select"
                         value={filter.status ?? ""} 
@@ -300,6 +340,41 @@ return (
                             ))}
                         </tbody>
                     </table>
+                    <nav aria-label="...">
+                      <ul className="pagination  d-flex justify-content-center">
+                        <li className={`page-item ${filter.pageNumber<=1? 'disabled':''}`}>
+                            <button 
+                              className="page-link" 
+                              onClick={() => setFilter(prev => ({ ...prev, pageNumber: prev.pageNumber - 1 }))}
+                              disabled={filter.pageNumber <= 1}
+                            >
+                              Previous
+                            </button>
+                        </li>
+                        {[...Array(totalPages)].map((_, index) => {
+                          const pageNum = index + 1;
+                          return (
+                            <li key={pageNum} className={`page-item ${filter.pageNumber === pageNum ? 'active' : ''}`}>
+                              <button 
+                                className="page-link" 
+                                onClick={() => setFilter(prev => ({ ...prev, pageNumber: pageNum }))}
+                              >
+                                {pageNum}
+                              </button>
+                            </li>
+                          );
+                        })}
+                        
+                        <li className={`page-item ${filter.pageNumber>=totalPages?'disabled':''}`}>
+                            <button className="page-link"
+                                onClick={()=>setFilter(prev=>({...prev, pageNumber: prev.pageNumber+1}))}
+                                disabled={filter.pageNumber >= totalPages}
+                            >
+                                Next
+                            </button>
+                        </li>
+                      </ul>
+                    </nav>
 
                 </div>
             </div>

@@ -7,8 +7,6 @@ public interface IUserRepository
 {
     Task<(List<User> Users, int Total)> GetAll(UserFilter filter);
     Task<User?> GetById(int id);
-    Task<User?> Delete(int id);
-    Task<User?> Block(int id);
     Task Update();
     
     Task<List<User>> DeleteSelected(List<int> ids);

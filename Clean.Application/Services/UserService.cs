@@ -53,26 +53,7 @@ public class UserService(IUserRepository repository,IHttpContextAccessor httpCon
         };
         return new Response<UserGetDto>(200, "User found", dto);
     }
-
-    public async Task<Response<string>> Delete(int id)
-    {
-        if (!await IsActorActive())   
-            return new Response<string>(400,"Access Denied");
-        var user = await repository.Delete(id);
-        if (user == null) return new Response<string>(404, "User not found!");
-        return new Response<string>(200, "The User has been deleted!");
-    }
-
-    public async Task<Response<string>> Block(int id)
-    {
-        if (!await IsActorActive())       
-            return new Response<string>(400,"Access Denied");
-        var user = await repository.Block(id);
-        if (user == null) return new Response<string>(404, "User not found!");
-        user.Status = Status.Blocked;
-        await repository.Update();
-        return new Response<string>("The user was blocked!");
-    }
+    
 
     public async Task<Response<string>> DeleteSelected(List<int> ids)
     {
@@ -91,6 +72,7 @@ public class UserService(IUserRepository repository,IHttpContextAccessor httpCon
         if (!users.Any()) return new Response<string>(404, "No user found!");
         foreach (var user in users)
         {
+            user.prevStatus = user.Status;
             user.Status = Status.Blocked;
         }
         await repository.Update();
@@ -105,7 +87,7 @@ public class UserService(IUserRepository repository,IHttpContextAccessor httpCon
         if (!users.Any()) return new Response<string>(404, "No user found!");
         foreach (var user in users)
         {
-            user.Status = Status.Active;
+            user.Status = user.prevStatus;
         }
 
         await repository.Update();

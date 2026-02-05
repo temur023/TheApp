@@ -1,7 +1,7 @@
 ﻿using Clean.Domain.Entities;
 
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Routing;
+namespace Clean.Application.Services;
+
 public class EmailVerificationLinkFactory(IConfiguration configuration)
 {
     public string Create(EmailVerificationToken verificationToken)

@@ -53,7 +53,7 @@ public class AuthenticationService(IAuthenticationRepository repository,IConfigu
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Email failed: {ex.Message}");
+                Console.WriteLine($"SMTP ERROR: {ex.Message}");
             }
 
             return new Response<string>(200, "The user has been registered!");

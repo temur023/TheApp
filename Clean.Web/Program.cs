@@ -11,11 +11,6 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Console.WriteLine("=== EMAIL CONFIG CHECK ===");
-Console.WriteLine("EmailHost: " + builder.Configuration["EmailHost"]);
-Console.WriteLine("EmailPort: " + builder.Configuration["EmailPort"]);
-Console.WriteLine("EmailUserName: " + builder.Configuration["EmailUserName"]);
-Console.WriteLine("==========================");
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();

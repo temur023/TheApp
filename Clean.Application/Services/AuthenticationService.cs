@@ -6,11 +6,10 @@ using Clean.Application.Dtos;
 using Clean.Application.Responses;
 using Clean.Domain.Entities;
 using FluentEmail.Core;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
+using Resend;
 
 namespace Clean.Application.Services;
 
@@ -18,58 +17,67 @@ public class AuthenticationService(IAuthenticationRepository repository,IConfigu
     IFluentEmail fluentEmail, EmailVerificationLinkFactory linkFactory):IAuthenticationService
 {
 
-    public async Task<Response<string>> Register(UserCreateDto user)
+public async Task<Response<string>> Register(UserCreateDto user)
+{
+    if (string.IsNullOrWhiteSpace(user.Password))
+        return new Response<string>(400, "Password is required.");
+
+    if (user.Password != user.CheckPassword)
+        return new Response<string>(400, "Passwords do not match.");
+
+    var model = new User
     {
-        if (string.IsNullOrWhiteSpace(user.Password))
-            return new Response<string>(400, "Password is required.");
+        FullName = user.FullName,
+        Email = user.Email,
+        Password = user.Password,
+        DateOfRegistration = DateTimeOffset.UtcNow,
+        LastSeen = DateTimeOffset.UtcNow,
+        Status = Status.Unverified
+    };
 
-        if (user.Password != user.CheckPassword)
-            return new Response<string>(400, "Passwords do not match.");
+    var token = new EmailVerificationToken
+    {
+        Id = Guid.NewGuid(),
+        UserId = model.Id,
+        Created = DateTimeOffset.UtcNow,
+        Expires = DateTimeOffset.UtcNow.AddDays(1)
+    };
 
-        var model = new User
-        {
-            FullName = user.FullName,
-            Email = user.Email,
-            Password = user.Password,
-            DateOfRegistration = DateTimeOffset.UtcNow,
-            LastSeen = DateTimeOffset.UtcNow,
-            Status = Status.Unverified
-        };
-
-        var token = new EmailVerificationToken
-        {
-            Id = Guid.NewGuid(),
-            UserId = model.Id,
-            Created = DateTimeOffset.UtcNow,
-            Expires = DateTimeOffset.UtcNow.AddDays(1)
-        };
-
-        try
-        {
-            await repository.Register(model, token);
-            
-        }
-        catch (DbUpdateException ex) when (
-            ex.InnerException is PostgresException pg &&
-            pg.SqlState == "23505")
-        {
-            return new Response<string>(400,"Email already registered");
-        }
-        
-        var result = await fluentEmail
-            .To(user.Email)
-            .Subject("Confirmation for login!")
-            .Body("Click the link to confirm", true)
-            .SendAsync();
-        
-        if (!result.Successful)
-        {
-                Console.WriteLine(string.Join("\n", result.ErrorMessages));
-        }
-
-        return new Response<string>(200, "Email sent!");
-
+    try
+    {
+        await repository.Register(model, token);
     }
+    catch (DbUpdateException ex) when (
+        ex.InnerException is PostgresException pg &&
+        pg.SqlState == "23505")
+    {
+        return new Response<string>(400, "Email already registered");
+    }
+    
+    try
+    {
+        var apiKey = Environment.GetEnvironmentVariable("RESEND_API_KEY")!;
+        var resend = ResendClient.Create(apiKey);
+
+        var verificationLink = $"https//:believable-wisdom-production.up.railway.app/api/VerifyEmail?token={token.Id}";
+
+        var response = await resend.EmailSendAsync(new EmailMessage
+        {
+            From = "temurmalikirgashev@gmail.com",
+            To = model.Email,
+            Subject = "Confirm your email",
+            HtmlBody = $"<p>Hello {model.FullName},</p><p>Click the link below to verify your email:</p><a href='{verificationLink}'>Verify Email</a>"
+        });
+
+        Console.WriteLine($"Email sent via Resend, ID: {response}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Failed to send email via Resend: {ex.Message}");
+    }
+
+    return new Response<string>(200, "Registration complete. Verification email sent!");
+}
 
     public async Task<Response<string>> Login(UserLoginDto user)
     {

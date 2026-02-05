@@ -151,3 +151,4 @@ D:\MyProjects\loginForm\Clean.Web\bin\Debug\net9.0\MailKit.dll
 D:\MyProjects\loginForm\Clean.Web\bin\Debug\net9.0\MimeKit.dll
 D:\MyProjects\loginForm\Clean.Web\obj\Debug\net9.0\Clean.Web.sourcelink.json
 D:\MyProjects\loginForm\Clean.Web\bin\Debug\net9.0\Clean.Application.staticwebassets.endpoints.json
+D:\MyProjects\loginForm\Clean.Web\bin\Debug\net9.0\Resend.dll

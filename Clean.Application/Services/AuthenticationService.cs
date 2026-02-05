@@ -43,18 +43,21 @@ public class AuthenticationService(IAuthenticationRepository repository,IConfigu
             await repository.Register(model,verificationToken);
             string verificationLink = linkFactory.Create(verificationToken);
 
-            try 
+            _ = Task.Run(async () => 
             {
-                await fluentEmail
-                    .To(user.Email)
-                    .Subject("Confirmation for login!")
-                    .Body($"<a href='{verificationLink}'>Click here</a> to confirm!", true)
-                    .SendAsync();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"SMTP ERROR: {ex.Message}");
-            }
+                try 
+                {
+                    await fluentEmail
+                        .To(user.Email)
+                        .Subject("Confirmation for login!")
+                        .Body($"<a href='{verificationLink}'>Click here</a> to confirm!", true)
+                        .SendAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Background SMTP Error: {ex.Message}");
+                }
+            });
 
             return new Response<string>(200, "The user has been registered!");
         }catch(Microsoft.EntityFrameworkCore.DbUpdateException)

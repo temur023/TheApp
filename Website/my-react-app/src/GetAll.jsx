@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import { Link } from "react-router";
 import { jwtDecode } from "jwt-decode";
 function GetAll(){
+    const api_url = "https://believable-wisdom-production.up.railway.app"
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [total, setTotal] = useState(0);
@@ -27,7 +28,7 @@ function GetAll(){
         try{
             const token = localStorage.getItem("userToken")
            
-                const response = await axios.put("http://localhost:5017/api/User/unblock-selected",checkedUsers,{
+                const response = await axios.put(`${api_url}/api/User/unblock-selected`,checkedUsers,{
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -53,7 +54,7 @@ function GetAll(){
 
     try {
         setLoading(true);
-        const response = await axios.put("http://localhost:5017/api/User/block-selected", checkedUsers, {
+        const response = await axios.put(`${api_url}/api/User/block-selected`, checkedUsers, {
             headers: { Authorization: `Bearer ${token}` }
         });
 
@@ -89,7 +90,7 @@ function GetAll(){
             decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"] || decoded.nameid
         );
 
-        const response = await axios.delete("http://localhost:5017/api/User/delete-selected", {
+        const response = await axios.delete(`${api_url}/api/User/delete-selected`, {
             headers: { Authorization: `Bearer ${token}` },
             data: checkedUsers 
         });
@@ -148,7 +149,7 @@ const fetchUsers = useCallback(async () => {
             requestParams.Status = filter.status; 
         }
 
-        const response = await axios.get("http://localhost:5017/api/User/get-all", {
+        const response = await axios.get(`${api_url}/api/User/get-all`, {
             headers: { Authorization: `Bearer ${token}` },
             params: requestParams
         });
@@ -180,7 +181,7 @@ const totalPages = Math.ceil(total/filter.pageSize)
         try{
             setLoading(true)
             const token = localStorage.getItem("userToken")
-            const response = await axios.delete("http://localhost:5017/api/User/delete-unverified",{
+            const response = await axios.delete(`${api_url}/api/User/delete-unverified`,{
                 headers: {
                     Authorization: `Bearer ${token}`
                 }

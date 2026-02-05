@@ -1275,7 +1275,10 @@
         },
         "runtime": {
           "bin/placeholder/Clean.Application.dll": {}
-        }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
       },
       "Clean.Domain/1.0.0": {
         "type": "project",

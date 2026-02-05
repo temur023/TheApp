@@ -18,3 +18,4 @@ D:\MyProjects\loginForm\Clean.Infrastructure\obj\Debug\net9.0\Clean.Infrastructu
 D:\MyProjects\loginForm\Clean.Infrastructure\obj\Debug\net9.0\Clean.Infrastructure.genruntimeconfig.cache
 D:\MyProjects\loginForm\Clean.Infrastructure\obj\Debug\net9.0\ref\Clean.Infrastructure.dll
 D:\MyProjects\loginForm\Clean.Infrastructure\obj\Debug\net9.0\Clean.Infrastructure.sourcelink.json
+D:\MyProjects\loginForm\Clean.Infrastructure\bin\Debug\net9.0\Clean.Application.staticwebassets.endpoints.json

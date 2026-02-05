@@ -2,6 +2,7 @@ import React, {useState} from "react";
 import axios from 'axios'
 import { Link, useNavigate } from "react-router-dom";
 function LoginPage() {
+    const api_url = "https://believable-wisdom-production.up.railway.app"
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error,setError] = useState("");
@@ -19,7 +20,7 @@ const handleLogin = async () => {
     try {
         setError("");
         const loginData = { Email: email, Password: password };
-        const response = await axios.post("http://localhost:5017/api/Auth/login", loginData);
+        const response = await axios.post(`${api_ur}/api/Auth/login`, loginData);
         
         const token = response.data.message || response.data.Message;
 

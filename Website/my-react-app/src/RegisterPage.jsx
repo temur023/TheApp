@@ -32,7 +32,7 @@ function RegisterPage() {
             CheckPassword: checkPassword
         }
         setError("")
-        const response = await axios.post("http://localhost:5017/api/Auth/create", registerData)
+        const response = await axios.post(`${api_ur}/api/Auth/create`, registerData)
         navigate("/login") 
     }
         catch(error){

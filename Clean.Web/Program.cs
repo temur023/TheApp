@@ -12,6 +12,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.RegisterInfrastructureServices(builder.Configuration);
+
+builder.Services
+    .AddFluentEmail(builder.Configuration["EmailUserName"])
+    .AddSmtpSender(
+        builder.Configuration["EmailHost"], 
+        int.Parse(builder.Configuration["EmailPort"] ?? "587"),
+        builder.Configuration["EmailUserName"],
+        builder.Configuration["EmailPassword"]
+    );
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {

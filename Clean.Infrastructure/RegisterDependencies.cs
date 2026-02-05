@@ -27,16 +27,16 @@ public static class RegisterDependencies
         services.AddScoped<HttpContextAccessor>();
         services.AddScoped<VerifyEmail>();
         services.AddHttpContextAccessor();
-        services.AddFluentEmail(configuration["EmailUserName"])
-            .AddSmtpSender(new System.Net.Mail.SmtpClient(configuration["EmailHost"])
-            {
-                Port = configuration.GetValue<int>("EmailPort"),
-                Credentials = new System.Net.NetworkCredential(
-                    configuration["EmailUserName"], 
-                    configuration["EmailPassword"]
-                ),
-                EnableSsl = true 
-            });
+        // services.AddFluentEmail(configuration["EmailUserName"])
+        //     .AddSmtpSender(new System.Net.Mail.SmtpClient(configuration["EmailHost"])
+        //     {
+        //         Port = configuration.GetValue<int>("EmailPort"),
+        //         Credentials = new System.Net.NetworkCredential(
+        //             configuration["EmailUserName"], 
+        //             configuration["EmailPassword"]
+        //         ),
+        //         EnableSsl = true 
+        //     });
         return services;
     }
 }

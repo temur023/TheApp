@@ -25,23 +25,28 @@ function RegisterPage() {
         setError("")
     }
    const handleRegister = async () => {
+    setError("");
+
+    const registerData = {
+        FullName: fullName,
+        Email: email,
+        Password: password,
+        CheckPassword: checkPassword
+    };
+
     try {
-        setError("");
         const response = await axios.post(`${api_url}/api/Auth/create`, registerData);
         
         if (response.data.statusCode === 200 || response.data.StatusCode === 200) {
-            navigate("/login"); 
+            navigate("/login");
         } else {
             setError(response.data.message || response.data.Message);
         }
     } catch (error) {
-    const msg = error.response?.data?.message || 
-                error.response?.data?.Message || 
-                error.message || 
-                "Connection Error";
-    setError(msg);
-}
-}
+        const serverMsg = error.response?.data?.Message || error.response?.data?.message || "Registration failed.";
+        setError(serverMsg);
+    }
+};
     return(
     <>
        <div className="container font-family-Aerial justify-content-center align-items-center vh-100">

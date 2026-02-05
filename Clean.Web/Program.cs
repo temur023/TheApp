@@ -29,15 +29,14 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("ReactAppPolicy", policy =>
-    {
-        policy.WithOrigins("https://theapp-production-3330.up.railway.app")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+builder.Services.AddCors(options => {
+    options.AddDefaultPolicy(policy => {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -81,7 +80,7 @@ builder.Services.AddSwaggerGen(opt =>
 });
 
 var app = builder.Build();
-app.UseHttpsRedirection();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -96,6 +95,7 @@ app.UseCors("ReactAppPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 UserEndpoints.Map(app);
+app.UseHttpsRedirection();
 
 app.MapControllers();
 using (var scope = app.Services.CreateScope())

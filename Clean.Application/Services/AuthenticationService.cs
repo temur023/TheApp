@@ -6,9 +6,11 @@ using Clean.Application.Dtos;
 using Clean.Application.Responses;
 using Clean.Domain.Entities;
 using FluentEmail.Core;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
+using Npgsql;
 
 namespace Clean.Application.Services;
 
@@ -46,9 +48,11 @@ public class AuthenticationService(IAuthenticationRepository repository,IConfigu
         {
             await repository.Register(model, token);
         }
-        catch (DbUpdateException)
+        catch (DbUpdateException ex) when (
+            ex.InnerException is PostgresException pg &&
+            pg.SqlState == "23505")
         {
-            return new Response<string>(400, "User with this email already exists.");
+            return new Response<string>(400,"Email already registered");
         }
         
         var result = await fluentEmail

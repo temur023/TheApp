@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "la4KkmaM0dM=",
+  "dgSpecHash": "v30FnbGkwsY=",
   "success": true,
   "projectFilePath": "D:\\MyProjects\\loginForm\\Clean.Application\\Clean.Application.csproj",
   "expectedPackageFiles": [
@@ -39,6 +39,7 @@
     "C:\\Users\\irgas\\.nuget\\packages\\microsoft.identitymodel.tokens\\8.15.0\\microsoft.identitymodel.tokens.8.15.0.nupkg.sha512",
     "C:\\Users\\irgas\\.nuget\\packages\\mimekit\\4.14.0\\mimekit.4.14.0.nupkg.sha512",
     "C:\\Users\\irgas\\.nuget\\packages\\mono.texttemplating\\3.0.0\\mono.texttemplating.3.0.0.nupkg.sha512",
+    "C:\\Users\\irgas\\.nuget\\packages\\npgsql\\9.0.3\\npgsql.9.0.3.nupkg.sha512",
     "C:\\Users\\irgas\\.nuget\\packages\\system.codedom\\6.0.0\\system.codedom.6.0.0.nupkg.sha512",
     "C:\\Users\\irgas\\.nuget\\packages\\system.collections.immutable\\7.0.0\\system.collections.immutable.7.0.0.nupkg.sha512",
     "C:\\Users\\irgas\\.nuget\\packages\\system.composition\\7.0.0\\system.composition.7.0.0.nupkg.sha512",

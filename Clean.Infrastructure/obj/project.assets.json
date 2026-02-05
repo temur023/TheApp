@@ -1159,6 +1159,7 @@
           "Clean.Domain": "1.0.0",
           "FluentEmail.Smtp": "3.0.2",
           "MailKit": "4.14.1",
+          "Npgsql": "9.0.3",
           "System.IdentityModel.Tokens.Jwt": "8.15.0"
         },
         "compile": {

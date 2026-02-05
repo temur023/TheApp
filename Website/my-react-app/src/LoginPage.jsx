@@ -20,7 +20,7 @@ const handleLogin = async () => {
     try {
         setError("");
         const loginData = { Email: email, Password: password };
-        const response = await axios.post(`${api_ur}/api/Auth/login`, loginData);
+        const response = await axios.post(`${api_url}/api/Auth/login`, loginData);
         
         const token = response.data.message || response.data.Message;
 

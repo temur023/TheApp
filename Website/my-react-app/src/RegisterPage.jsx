@@ -2,6 +2,7 @@ import { data, Link, useNavigate } from "react-router-dom";
 import React, {useState} from "react";
 import axios from "axios";
 function RegisterPage() {
+    const api_url = "https://believable-wisdom-production.up.railway.app"
     const [fullName,setFullName] = useState("");
     const [email,setEmail] = useState("");
     const [password,setPassword] = useState("");
@@ -32,7 +33,7 @@ function RegisterPage() {
             CheckPassword: checkPassword
         }
         setError("")
-        const response = await axios.post(`${api_ur}/api/Auth/create`, registerData)
+        const response = await axios.post(`${api_url}/api/Auth/create`, registerData)
         navigate("/login") 
     }
         catch(error){

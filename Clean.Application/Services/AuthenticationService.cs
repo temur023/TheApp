@@ -42,12 +42,21 @@ public class AuthenticationService(IAuthenticationRepository repository,IConfigu
             };
             await repository.Register(model,verificationToken);
             string verificationLink = linkFactory.Create(verificationToken);
-        
-            await fluentEmail
-                .To(user.Email)
-                .Subject("Confirmation for login!")
-                .Body($"<a href='{verificationLink}'>Click here</a> to confirm!", true).SendAsync();
-            return new Response<string>(200, "The user has been registered! ");
+
+            try 
+            {
+                await fluentEmail
+                    .To(user.Email)
+                    .Subject("Confirmation for login!")
+                    .Body($"<a href='{verificationLink}'>Click here</a> to confirm!", true)
+                    .SendAsync();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Email failed: {ex.Message}");
+            }
+
+            return new Response<string>(200, "The user has been registered!");
         }catch(Microsoft.EntityFrameworkCore.DbUpdateException)
         {
             return new Response<string>(400, "User with this email already exists!");

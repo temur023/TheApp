@@ -1,3 +1,5 @@
+using System.Net;
+using System.Net.Mail;
 using System.Text;
 using Clean.Application.Services;
 using Clean.Infrastructure;
@@ -14,15 +16,17 @@ builder.Services.AddControllers();
 builder.Services.RegisterInfrastructureServices(builder.Configuration);
 
 builder.Services
-    .AddFluentEmail(builder.Configuration["EmailUserName"])
-    .AddSmtpSender(new System.Net.Mail.SmtpClient(builder.Configuration["EmailHost"])
+    .AddFluentEmail("1rgashevjon@gmail.com")
+    .AddSmtpSender(new SmtpClient(builder.Configuration["EmailHost"])
     {
-        Port = int.Parse(builder.Configuration["EmailPort"] ?? "2525"),
-        Credentials = new System.Net.NetworkCredential(
-            builder.Configuration["EmailUserName"], 
-            builder.Configuration["EmailPassword"]),
-        EnableSsl = true,
+        Port = int.Parse(builder.Configuration["EmailPort"]!),
+        Credentials = new NetworkCredential(
+            builder.Configuration["EmailUserName"],
+            builder.Configuration["EmailPassword"]
+        ),
+        EnableSsl = true
     });
+
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {

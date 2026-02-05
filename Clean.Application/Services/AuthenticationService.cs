@@ -43,20 +43,22 @@ public class AuthenticationService(IAuthenticationRepository repository,IConfigu
             await repository.Register(model,verificationToken);
             string verificationLink = linkFactory.Create(verificationToken);
 
-            _ = Task.Run(() => 
+            _ = Task.Run(async () => 
             {
-                try 
+                try
                 {
-                    fluentEmail
+                    await fluentEmail
                         .To(user.Email)
                         .Subject("Confirmation for login!")
                         .Body($"<a href='{verificationLink}'>Click here</a> to confirm!", true)
-                        .Send();
+                        .SendAsync();
+                    return new Response<string>(200, "The email sent");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Background SMTP Error: {ex.Message}");
+                    return new Response<string>(500, "Failed to send verification email.");
                 }
+                
             });
 
             return new Response<string>(200, "The user has been registered!");

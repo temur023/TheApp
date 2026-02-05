@@ -15,13 +15,15 @@ builder.Services.RegisterInfrastructureServices(builder.Configuration);
 
 builder.Services
     .AddFluentEmail(builder.Configuration["EmailUserName"])
-    .AddSmtpSender(() => new System.Net.Mail.SmtpClient("smtp.gmail.com")
+    .AddSmtpSender(new System.Net.Mail.SmtpClient("smtp.gmail.com")
     {
         Port = 587,
         Credentials = new System.Net.NetworkCredential(
             builder.Configuration["EmailUserName"], 
             builder.Configuration["EmailPassword"]),
-        EnableSsl = true
+        EnableSsl = true,
+        DeliveryMethod = System.Net.Mail.SmtpDeliveryMethod.Network,
+        UseDefaultCredentials = false
     });
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

@@ -65,7 +65,7 @@ public async Task<Response<string>> Register(UserCreateDto user)
 
         var payload = new
         {
-            from = new { email = "no-reply@mailersend.com", name = "TheApp" },
+            from = new { email = "sandbox@msandbox.mailersend.net", name = "TheApp" },
             to = new[] { new { email = model.Email } },
             subject = "Confirm your email",
             html = $"<p>Hello {model.FullName},</p><p>Click the link below to verify your email:</p><a href='{verificationLink}'>Verify Email</a>"

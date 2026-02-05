@@ -24,23 +24,19 @@ function RegisterPage() {
         setCheckPassword(e.target.value)
         setError("")
     }
-    const handleRegister = async () => {
-        try{
-            const registerData = {
-            FullName: fullName,
-            Email: email,
-            Password: password,
-            CheckPassword: checkPassword
-        }
-        setError("")
-        const response = await axios.post(`${api_url}/api/Auth/create`, registerData)
-        navigate("/login") 
-    }
-        catch(error){
-            const serverMessage = error.response?.data?.message || "Invalid email";
-            setError(serverMessage);
-        }
+   const handleRegister = async () => {
+    try {
+        setError("");
+        const response = await axios.post(`${api_url}/api/Auth/create`, registerData);
         
+        if (response.data.statusCode === 200 || response.data.StatusCode === 200) {
+            navigate("/login"); 
+        } else {
+            setError(response.data.message || response.data.Message);
+        }
+    } catch (error) {
+        setError(error.response?.data?.Message || "Registration failed.");
+    }
 }
     return(
     <>

@@ -7,7 +7,6 @@ using Clean.Application.Abstractions;
 using Clean.Application.Dtos;
 using Clean.Application.Responses;
 using Clean.Domain.Entities;
-using FluentEmail.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
@@ -58,33 +57,31 @@ public async Task<Response<string>> Register(UserCreateDto user)
     {
         var apiKey = Environment.GetEnvironmentVariable("MAILSEND_API_KEY")!;
         var client = new HttpClient();
-        client.DefaultRequestHeaders.Authorization =
-            new AuthenticationHeaderValue("Bearer", apiKey);
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
 
         var verificationLink = $"https://believable-wisdom-production.up.railway.app/api/VerifyEmail?token={token.Id}";
-
+        
         var payload = new
         {
-            from = new { email = "info@domain.com", name = "TheApp" },
-            to = new[] { new { email = model.Email } },
+            from = "onboarding@resend.dev",
+            to = new[] { model.Email },     
             subject = "Confirm your email",
-            html = $"<p>Hello {model.FullName},</p><p>Click the link below to verify your email:</p><a href='{verificationLink}'>Verify Email</a>"
+            html = $"<p>Hello {model.FullName},</p><p>Click the link below to verify:</p><a href='{verificationLink}'>Verify Email</a>"
         };
 
         var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-
-        var response = await client.PostAsync("https://api.mailersend.com/v1/email", content);
-
+        
+        var response = await client.PostAsync("https://api.resend.com/emails", content);
         var responseText = await response.Content.ReadAsStringAsync();
 
         if (response.IsSuccessStatusCode)
-            Console.WriteLine("Email sent successfully via MailerSend!");
+            Console.WriteLine("Email sent successfully via Resend Sandbox!");
         else
-            Console.WriteLine($"Failed to send email: {response.StatusCode} - {responseText}");
+            Console.WriteLine($"Failed: {response.StatusCode} - {responseText}");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Failed to send email: {ex.Message}");
+        Console.WriteLine($"Critical Error: {ex.Message}");
     }
 
 

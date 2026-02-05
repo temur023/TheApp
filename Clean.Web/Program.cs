@@ -11,12 +11,18 @@ using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
+Console.WriteLine("=== EMAIL CONFIG CHECK ===");
+Console.WriteLine("EmailHost: " + builder.Configuration["EmailHost"]);
+Console.WriteLine("EmailPort: " + builder.Configuration["EmailPort"]);
+Console.WriteLine("EmailUserName: " + builder.Configuration["EmailUserName"]);
+Console.WriteLine("==========================");
+
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.RegisterInfrastructureServices(builder.Configuration);
 
 builder.Services
-    .AddFluentEmail("1rgashevjon@gmail.com") 
+    .AddFluentEmail("temurmalikirgashev@gmail.com") 
     .AddSmtpSender(new SmtpClient(builder.Configuration["EmailHost"], builder.Configuration.GetValue<int>("EmailPort"))
     {
         Credentials = new NetworkCredential(builder.Configuration["EmailUserName"],

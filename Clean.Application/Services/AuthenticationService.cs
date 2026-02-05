@@ -47,6 +47,7 @@ public class AuthenticationService(IAuthenticationRepository repository,IConfigu
         try
         {
             await repository.Register(model, token);
+            
         }
         catch (DbUpdateException ex) when (
             ex.InnerException is PostgresException pg &&
@@ -63,8 +64,7 @@ public class AuthenticationService(IAuthenticationRepository repository,IConfigu
         
         if (!result.Successful)
         {
-            var errors = string.Join(", ", result.ErrorMessages);
-            return new Response<string>(500, $"Failed to send email: {errors}");
+                Console.WriteLine(string.Join("\n", result.ErrorMessages));
         }
 
         return new Response<string>(200, "Email sent!");

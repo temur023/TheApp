@@ -1,6 +1,8 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
+using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json;
 using Clean.Application.Abstractions;
 using Clean.Application.Dtos;
 using Clean.Application.Responses;
@@ -56,25 +58,35 @@ public async Task<Response<string>> Register(UserCreateDto user)
     
     try
     {
-        var apiKey = Environment.GetEnvironmentVariable("RESEND_API_KEY")!;
-        var resend = ResendClient.Create(apiKey);
+        var apiKey = Environment.GetEnvironmentVariable("MAILSEND_API_KEY")!;
+        var client = new HttpClient();
+        client.DefaultRequestHeaders.Authorization =
+            new AuthenticationHeaderValue("Bearer", apiKey);
 
-        var verificationLink = $"https//:believable-wisdom-production.up.railway.app/api/VerifyEmail?token={token.Id}";
+        var verificationLink = $"believable-wisdom-production.up.railway.app/api/VerifyEmail?token={token.Id}";
 
-        var response = await resend.EmailSendAsync(new EmailMessage
+        var payload = new
         {
-            From = "temurmalikirgashev@gmail.com",
-            To = model.Email,
-            Subject = "Confirm your email",
-            HtmlBody = $"<p>Hello {model.FullName},</p><p>Click the link below to verify your email:</p><a href='{verificationLink}'>Verify Email</a>"
-        });
+            from = new { email = "no-reply@mailersend.com", name = "TheApp" },
+            to = new[] { new { email = model.Email } },
+            subject = "Confirm your email",
+            html = $"<p>Hello {model.FullName},</p><p>Click the link below to verify your email:</p><a href='{verificationLink}'>Verify Email</a>"
+        };
 
-        Console.WriteLine($"Email sent via Resend, ID: {response}");
+        var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+        var response = await client.PostAsync("https://api.mailersend.com/v1/email", content);
+
+        if (response.IsSuccessStatusCode)
+            Console.WriteLine("Email sent successfully via MailerSend!");
+        else
+            Console.WriteLine($"Failed to send email: {response.StatusCode}");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"Failed to send email via Resend: {ex.Message}");
+        Console.WriteLine($"Failed to send email: {ex.Message}");
     }
+
 
     return new Response<string>(200, "Registration complete. Verification email sent!");
 }

@@ -20,7 +20,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactAppPolicy", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins("theapp-production-3330.up.railway.app")
             .AllowAnyHeader()
             .AllowAnyMethod();
     }); 

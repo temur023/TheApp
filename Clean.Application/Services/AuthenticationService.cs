@@ -43,15 +43,15 @@ public class AuthenticationService(IAuthenticationRepository repository,IConfigu
             await repository.Register(model,verificationToken);
             string verificationLink = linkFactory.Create(verificationToken);
 
-            _ = Task.Run(async () => 
+            _ = Task.Run(() => 
             {
                 try 
                 {
-                    await fluentEmail
+                    fluentEmail
                         .To(user.Email)
                         .Subject("Confirmation for login!")
                         .Body($"<a href='{verificationLink}'>Click here</a> to confirm!", true)
-                        .SendAsync();
+                        .Send();
                 }
                 catch (Exception ex)
                 {

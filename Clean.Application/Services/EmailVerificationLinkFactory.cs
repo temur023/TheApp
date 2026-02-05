@@ -2,18 +2,17 @@
 
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-
-namespace Clean.Application.Services;
-
-public class EmailVerificationLinkFactory(IHttpContextAccessor httpContextAccessor,
-    LinkGenerator linkGenerator)
+public class EmailVerificationLinkFactory(IConfiguration configuration)
 {
     public string Create(EmailVerificationToken verificationToken)
     {
-        string? verifactionLink = linkGenerator.GetUriByName(
-            httpContextAccessor.HttpContext!,
-            UserEndpoints.VerifyEmail,
-            new { token = verificationToken.Id });
-        return verifactionLink ?? "Couldn't Create Verfication Link!";
+        var baseUrl = configuration["AppBaseUrl"]; 
+        
+        if (string.IsNullOrEmpty(baseUrl))
+        {
+            return "Base URL not configured!";
+        }
+
+        return $"{baseUrl.TrimEnd('/')}/users/verify-email?token={verificationToken.Id}";
     }
 }

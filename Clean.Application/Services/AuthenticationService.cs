@@ -75,9 +75,10 @@ public async Task<Response<string>> Register(UserCreateDto user)
         using var client = new SmtpClient(smtpHost, smtpPort)
         {
             Credentials = new NetworkCredential(smtpUser, smtpPass),
-            EnableSsl = true, // REQUIRED for Gmail
+            EnableSsl = true, 
             DeliveryMethod = SmtpDeliveryMethod.Network,
-            UseDefaultCredentials = false
+            UseDefaultCredentials = false,
+            TargetName = "STARTTLS/smtp.gmail.com"
         };
 
         // Construct the correct verification link

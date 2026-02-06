@@ -20,17 +20,19 @@ public class AuthenticationService(IAuthenticationRepository repository,IConfigu
 
 public async Task<Response<string>> Register(UserCreateDto user)
 {
+    // 1. Validation
     if (string.IsNullOrWhiteSpace(user.Password))
         return new Response<string>(400, "Password is required.");
 
     if (user.Password != user.CheckPassword)
         return new Response<string>(400, "Passwords do not match.");
 
+    // 2. Create User Model
     var model = new User
     {
         FullName = user.FullName,
         Email = user.Email,
-        Password = user.Password,
+        Password = user.Password, // Note: In production, ALWAYS hash this password!
         DateOfRegistration = DateTimeOffset.UtcNow,
         LastSeen = DateTimeOffset.UtcNow,
         Status = Status.Unverified
@@ -44,48 +46,68 @@ public async Task<Response<string>> Register(UserCreateDto user)
         Expires = DateTimeOffset.UtcNow.AddDays(1)
     };
 
+    // 3. Save to Database
     try
     {
         await repository.Register(model, token);
     }
-    catch (DbUpdateException ex) when (
-        ex.InnerException is PostgresException pg &&
-        pg.SqlState == "23505")
+    catch (DbUpdateException ex) when (ex.InnerException is PostgresException pg && pg.SqlState == "23505")
     {
         return new Response<string>(400, "Email already registered");
     }
-    
+
+    // 4. Send Email via Gmail
     try
     {
-        var smtpHost = Environment.GetEnvironmentVariable("MAILTRAP_HOST") ?? "sandbox.smtp.mailtrap.io";
+        // Get vars from Environment (populated from Railway)
+        var smtpHost = Environment.GetEnvironmentVariable("MAILTRAP_HOST");
         var smtpPort = int.Parse(Environment.GetEnvironmentVariable("MAILTRAP_PORT") ?? "587");
-        var smtpUser = Environment.GetEnvironmentVariable("MAILTRAP_USER") ?? "7cca393f713483";
-        var smtpPass = Environment.GetEnvironmentVariable("MAILTRAP_PASS") ?? "3354d871180949";
+        var smtpUser = Environment.GetEnvironmentVariable("MAILTRAP_USER");
+        var smtpPass = Environment.GetEnvironmentVariable("MAILTRAP_PASS");
+        var baseUrl  = Environment.GetEnvironmentVariable("AppBaseUrl"); // Make sure this is set in Railway!
+
+        if (string.IsNullOrEmpty(smtpHost) || string.IsNullOrEmpty(smtpPass))
+        {
+            Console.WriteLine("❌ SMTP Configuration missing.");
+            return new Response<string>(500, "Server email configuration error.");
+        }
 
         using var client = new SmtpClient(smtpHost, smtpPort)
         {
             Credentials = new NetworkCredential(smtpUser, smtpPass),
-            EnableSsl = true
+            EnableSsl = true, // REQUIRED for Gmail
+            DeliveryMethod = SmtpDeliveryMethod.Network,
+            UseDefaultCredentials = false
         };
 
-        var verificationLink = $"https://believable-wisdom-production.up.railway.app/api/VerifyEmail?token={token.Id}";
+        // Construct the correct verification link
+        // Adjust the path "/api/Auth/verify..." based on your actual Controller route
+        var verificationLink = $"{baseUrl.TrimEnd('/')}/api/VerifyEmail?token={token.Id}";
 
         var mailMessage = new MailMessage
         {
-            From = new MailAddress("no-reply@yourapp.com", "TheApp"), 
+            From = new MailAddress(smtpUser, "TheApp Support"), // Gmail requires 'From' to match the authenticated user
             Subject = "Confirm your email",
-            Body = $"<p>Hello {model.FullName},</p><p>Click the link below to verify your email:</p><a href='{verificationLink}'>Verify Email</a>",
+            Body = $@"
+                <div style='font-family: Arial, sans-serif; padding: 20px;'>
+                    <h2>Hello {model.FullName},</h2>
+                    <p>Thank you for registering. Please click the button below to verify your email address:</p>
+                    <a href='{verificationLink}' style='background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>Verify Email</a>
+                    <p style='margin-top:20px; color: #888;'>If the button doesn't work, copy this link: <br>{verificationLink}</p>
+                </div>",
             IsBodyHtml = true
         };
         
         mailMessage.To.Add(model.Email);
 
         await client.SendMailAsync(mailMessage);
-        Console.WriteLine("✅ Test email sent successfully to Mailtrap!");
+        Console.WriteLine($"✅ Email sent to {model.Email} via Gmail!");
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"❌ Failed to send email: {ex.Message}");
+        // Log the full error to Railway logs so you can debug
+        Console.WriteLine($"❌ Failed to send email: {ex.Message} | {ex.InnerException?.Message}");
+        // Optional: Don't fail the request if email fails, or return 500 depending on requirements
     }
 
     return new Response<string>(200, "Registration complete. Verification email sent!");

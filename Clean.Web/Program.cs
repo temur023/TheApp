@@ -16,8 +16,6 @@ builder.Services.AddOpenApi();
 builder.Services.AddControllers();
 builder.Services.RegisterInfrastructureServices(builder.Configuration);
 
-
-
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {

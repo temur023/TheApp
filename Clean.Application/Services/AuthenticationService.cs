@@ -20,19 +20,17 @@ public class AuthenticationService(IAuthenticationRepository repository,IConfigu
 
 public async Task<Response<string>> Register(UserCreateDto user)
 {
-    // 1. Validation
     if (string.IsNullOrWhiteSpace(user.Password))
         return new Response<string>(400, "Password is required.");
 
     if (user.Password != user.CheckPassword)
         return new Response<string>(400, "Passwords do not match.");
 
-    // 2. Create User Model
     var model = new User
     {
         FullName = user.FullName,
         Email = user.Email,
-        Password = user.Password, // Note: In production, ALWAYS hash this password!
+        Password = user.Password,
         DateOfRegistration = DateTimeOffset.UtcNow,
         LastSeen = DateTimeOffset.UtcNow,
         Status = Status.Unverified
@@ -45,8 +43,7 @@ public async Task<Response<string>> Register(UserCreateDto user)
         Created = DateTimeOffset.UtcNow,
         Expires = DateTimeOffset.UtcNow.AddDays(1)
     };
-
-    // 3. Save to Database
+    
     try
     {
         await repository.Register(model, token);
@@ -55,20 +52,17 @@ public async Task<Response<string>> Register(UserCreateDto user)
     {
         return new Response<string>(400, "Email already registered");
     }
-
-    // 4. Send Email via Gmail
+    
     try
     {
-        // Get vars from Environment (populated from Railway)
         var smtpHost = Environment.GetEnvironmentVariable("MAILTRAP_HOST");
         var smtpPort = int.Parse(Environment.GetEnvironmentVariable("MAILTRAP_PORT") ?? "587");
         var smtpUser = Environment.GetEnvironmentVariable("MAILTRAP_USER");
         var smtpPass = Environment.GetEnvironmentVariable("MAILTRAP_PASS");
-        var baseUrl  = Environment.GetEnvironmentVariable("AppBaseUrl"); // Make sure this is set in Railway!
+        var baseUrl  = Environment.GetEnvironmentVariable("AppBaseUrl");
 
         if (string.IsNullOrEmpty(smtpHost) || string.IsNullOrEmpty(smtpPass))
         {
-            Console.WriteLine("❌ SMTP Configuration missing.");
             return new Response<string>(500, "Server email configuration error.");
         }
 
@@ -80,14 +74,12 @@ public async Task<Response<string>> Register(UserCreateDto user)
             UseDefaultCredentials = false,
             TargetName = "STARTTLS/smtp.gmail.com"
         };
-
-        // Construct the correct verification link
-        // Adjust the path "/api/Auth/verify..." based on your actual Controller route
-        var verificationLink = $"{baseUrl.TrimEnd('/')}/api/VerifyEmail?token={token.Id}";
+        
+        var verificationLink = $"{baseUrl}api/VerifyEmail?token={token.Id}";
 
         var mailMessage = new MailMessage
         {
-            From = new MailAddress(smtpUser, "TheApp Support"), // Gmail requires 'From' to match the authenticated user
+            From = new MailAddress(smtpUser, "TheApp Support"),
             Subject = "Confirm your email",
             Body = $@"
                 <div style='font-family: Arial, sans-serif; padding: 20px;'>
@@ -102,13 +94,10 @@ public async Task<Response<string>> Register(UserCreateDto user)
         mailMessage.To.Add(model.Email);
 
         await client.SendMailAsync(mailMessage);
-        Console.WriteLine($"✅ Email sent to {model.Email} via Gmail!");
     }
     catch (Exception ex)
     {
-        // Log the full error to Railway logs so you can debug
-        Console.WriteLine($"❌ Failed to send email: {ex.Message} | {ex.InnerException?.Message}");
-        // Optional: Don't fail the request if email fails, or return 500 depending on requirements
+        Console.WriteLine($" Failed to send email: {ex.Message} | {ex.InnerException?.Message}");
     }
 
     return new Response<string>(200, "Registration complete. Verification email sent!");

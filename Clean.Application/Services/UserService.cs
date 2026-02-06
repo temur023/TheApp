@@ -23,8 +23,8 @@ public class UserService(IUserRepository repository,IHttpContextAccessor httpCon
     }
     public async Task<PagedResponse<UserGetDto>> GetAll(UserFilter filter)
     {
-        if (!await IsActorActive()) 
-            return new PagedResponse<UserGetDto>(new List<UserGetDto>(), 0, 0, 0,"Access Denied");
+        // if (!await IsActorActive()) 
+        //     return new PagedResponse<UserGetDto>(new List<UserGetDto>(), 0, 0, 0,"Access Denied");
         var users = await repository.GetAll(filter);
         var dto = users.Users.Select(u => new UserGetDto
         {
@@ -57,8 +57,8 @@ public class UserService(IUserRepository repository,IHttpContextAccessor httpCon
 
     public async Task<Response<string>> DeleteSelected(List<int> ids)
     {
-        if (!await IsActorActive())    
-            return new Response<string>(400,"Access Denied");
+        // if (!await IsActorActive())    
+        //     return new Response<string>(400,"Access Denied");
         var users = await repository.DeleteSelected(ids);
         if (!users.Any()) return new Response<string>(404, "No user found!");
         return new Response<string>(200, $"{users.Count} Users have been deleted!");
@@ -66,8 +66,8 @@ public class UserService(IUserRepository repository,IHttpContextAccessor httpCon
 
     public async Task<Response<string>> BlockSelected(List<int> ids)
     {
-        if (!await IsActorActive())   
-            return new Response<string>(400,"Access Denied");
+        // if (!await IsActorActive())   
+        //     return new Response<string>(400,"Access Denied");
         var users = await repository.BlockSelected(ids);
         if (!users.Any()) return new Response<string>(404, "No user found!");
         foreach (var user in users)
@@ -81,8 +81,8 @@ public class UserService(IUserRepository repository,IHttpContextAccessor httpCon
 
     public async Task<Response<string>> UnblockSelected(List<int> ids)
     {
-        if (!await IsActorActive())   
-            return new Response<string>(400,"Access Denied");
+        // if (!await IsActorActive())   
+        //     return new Response<string>(400,"Access Denied");
         var users = await repository.UnblockSelected(ids);
         if (!users.Any()) return new Response<string>(404, "No user found!");
         foreach (var user in users)
@@ -96,8 +96,8 @@ public class UserService(IUserRepository repository,IHttpContextAccessor httpCon
 
     public async Task<Response<string>> DeleteUnverified()
     {
-        if (!await IsActorActive())     
-            return new Response<string>(400,"Access Denied");
+        // if (!await IsActorActive())     
+        //     return new Response<string>(400,"Access Denied");
         var users = await repository.DeleteUnverified();
         if (!users.Any()) return new Response<string>(404, "No unverified users found!");
         return new Response<string>(200, $"{users.Count} Unverified users have been deleted");
